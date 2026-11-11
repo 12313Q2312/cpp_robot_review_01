@@ -1,107 +1,75 @@
-# C++ Robot Review 01
+# C++ Robot State Simulator
 
-A simple C++ project for reviewing object-oriented programming and basic software engineering concepts.
+**用组合式 C++ 组件描述机器人，并用一段可复现动作序列观察状态变化。**
 
-## Project Description
+项目将 `Robot`、`Battery` 和左右 `Motor` 组合成一个机器人对象，记录二维位置、朝向、电量与运动轨迹。它提供一个小而清晰的状态模型，用于检查组件接口、动作顺序和状态更新之间的关系。
 
-This project simulates a simple robot with the following components:
+技术栈：**C++17 · CMake · 命令行状态与轨迹输出**。
 
-- Robot
-- Battery
-- Left Motor
-- Right Motor
+## 当前能力
 
-The robot can move, turn, change speed, record its movement path, and display its current status.
+| 组件 | 现有职责 |
+|---|---|
+| `Robot` | 前进、后退、四方向转向、状态输出与轨迹记录 |
+| `Battery` | 充放电及剩余电量状态 |
+| `Motor` | 转速状态、停止与状态输出 |
+| `main.cpp` | 创建机器人并执行一段固定动作序列 |
 
-This project is intended as a C++ review before learning more advanced robotics development with ROS2.
+当前 `speed` 直接决定一次移动调用的位移步长，没有时间步长或物理单位；电机 RPM 是状态变量，不参与差速运动学计算。该模型适用于离散状态实验，尚未包含传感器、碰撞检测、闭环控制或真实电机通信。
 
----
+## 五步示例
 
-## Features
+示例以 `(0, 0)`、朝北开始，设置步长为 `5`：
 
-- Robot class
-- Battery class
-- Motor class
-- Object composition
-- Position tracking
-- Path history using `std::vector`
-- Status display
-- Modular project structure
-- CMake build system
+| 动作 | 位置 | 朝向 |
+|---|---|---|
+| 前进 | `(0, 5)` | 北 |
+| 右转 | `(0, 5)` | 东 |
+| 前进 | `(5, 5)` | 东 |
+| 后退 | `(0, 5)` | 东 |
+| 左转 | `(0, 5)` | 北 |
 
----
+最终应输出 **X=0、Y=5、朝北**。位置轨迹记录初始点及三次平移动作，转向动作更新朝向而不新增位置点。对应代码见 [src/main.cpp](src/main.cpp) 和 [src/Robot.cpp](src/Robot.cpp)。
 
-## Project Structure
+## 构建与运行
 
-```
-cpp_robot_review_01/
-├── CMakeLists.txt
-├── README.md
-├── include/
-│   ├── Robot.h
-│   ├── Motor.h
-│   └── Battery.h
-└── src/
-    ├── main.cpp
-    ├── Robot.cpp
-    ├── Battery.cpp
-    └── Motor.cpp
+需要 **CMake 3.16+** 和支持 **C++17** 的编译器；在仓库根目录运行。
+
+### Linux / 单配置生成器
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+./build/robot_run
 ```
 
----
+### Windows / Visual Studio 生成器
 
-## Build
-
-```bash
-mkdir build
-cd build
-cmake ..
-cmake --build .
+```powershell
+cmake -S . -B build
+cmake --build build --config Release
+.\build\Release\robot_run.exe
 ```
 
-Run:
+使用 MSVC 时，先在 Visual Studio Developer PowerShell 中确认编译器可用。MinGW 的可执行文件通常为 `build/robot_run.exe`。程序末尾等待输入，必要时再按一次回车退出。
 
-```bash
-./cpp_robot_review_01
-```
+原有 [run.bat](run.bat) 固定使用 MinGW 并删除旧 build 目录；它是原环境的快捷脚本。首次运行建议使用上面的显式命令，便于观察每一步结果。
 
-(On Windows, run the generated executable.)
+## 代码导航
 
----
+| 入口 | 用途 |
+|---|---|
+| [include/Robot.h](include/Robot.h) | 机器人动作与状态接口 |
+| [include/Battery.h](include/Battery.h) | 电量接口 |
+| [include/Motor.h](include/Motor.h) | 电机状态接口 |
+| [src/](src/) | 组件实现与运行示例 |
+| [CMakeLists.txt](CMakeLists.txt) | 构建目标 `robot_run` |
+| [验证记录](docs/hygiene-20261103.md) | 干净构建、示例输出、资产清理与恢复 |
 
-## Concepts Practiced
+## 验证与后续工作
 
-- C++ Classes
-- Constructors
-- Encapsulation
-- Composition
-- Header / Source file separation
-- std::vector
-- References
-- const
-- Basic CMake
+2026-11-03 已在 Linux GCC 上，从干净导出目录完成 CMake 配置、编译与示例运行，最终坐标与上述动作序列一致。仓库目前没有自动化单元测试套件，Windows 构建尚未实测。
 
----
+下一步适合先为转向、位移、电量耗尽和输入边界建立断言测试；若要引入时间步长、控制器或硬件接口，应先确定模型契约和验收标准。
 
-## Future Improvements
-
-- Add sensors
-- Add obstacle detection
-- Add robot controller
-- Support multiple robots
-- Integrate with ROS2
-
-## Learning Purpose
-
-This project is the first practice project in my robotics learning journey.
-
-The goal is not only to review C++, but also to build the habit of designing software for real robotic systems.
-
-Future projects will gradually integrate:
-
-- ROS2
-- Linux
-- STM32
-- Sensors
-- Motors
-- Control Algorithms
+项目负责人把握技术方向与最终合并；AI 工程助手承担实现、排查和维护。变更通过独立分支与可恢复提交交付 PR，验证结果随修改更新。
