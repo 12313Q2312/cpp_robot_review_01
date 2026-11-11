@@ -4,10 +4,10 @@ project(cpp_robot_review_01 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Ö¸¶¨Í·ÎÄ¼şÄ¿Â¼
+# æŒ‡å®šå¤´æ–‡ä»¶ç›®å½•
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-# È«²¿Ô´ÎÄ¼ş±ØĞëÈ«²¿Ğ´ÉÏ
+# å…¨éƒ¨æºæ–‡ä»¶å¿…é¡»å…¨éƒ¨å†™ä¸Š
 set(SRC_FILES
     src/main.cpp
     src/Battery.cpp
@@ -16,3 +16,6 @@ set(SRC_FILES
 )
 
 add_executable(robot_run ${SRC_FILES})
+if(MSVC)
+    target_compile_options(robot_run PRIVATE /utf-8)
+endif()

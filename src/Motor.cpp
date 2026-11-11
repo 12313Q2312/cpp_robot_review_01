@@ -22,5 +22,5 @@ void Motor::stop()
 
 void Motor::printStatus() const
 {
-    std::cout << motorName << " 当前转速：" << rpm << " RPM" << std::endl;
+    std::cout << motorName << " 褰撳墠杞�燂細" << rpm << " RPM" << std::endl;
 }
